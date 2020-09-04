@@ -5,6 +5,13 @@ import (
 	"net/http"
 )
 
+type Student struct {
+	Name string	`json:"name"`
+	Age string	`json:"age"`
+	Gender string	`json:"gender"`
+	Class string	`json:"class"`
+}
+
 func main() {
 
 	router := gin.Default()
@@ -23,6 +30,44 @@ func main() {
 		firstname := context.DefaultQuery("firstname", "Guest")
 		lastname := context.Query("lastname")
 		context.String(http.StatusOK, "Hello %s %s", firstname, lastname)
+	})
+
+
+	router.POST("/form/post", func(context *gin.Context) {
+		name := context.PostForm("name")
+		age := context.PostForm("age")
+		gender := context.PostForm("gender")
+		class := context.PostForm("class")
+
+		student := Student{}
+		student.Name = name
+		student.Age = age
+		student.Gender = gender
+		student.Class = class
+
+		context.JSON(http.StatusOK, gin.H{
+			"code":"200",
+			"message":"success",
+			"data": student,
+		})
+	})
+
+	router.POST("/json/post", func(context *gin.Context) {
+
+		student := &Student{}
+		if err := context.BindJSON(student); err != nil {
+			context.JSON(http.StatusInternalServerError, gin.H{
+				"code":"500",
+				"message":"error",
+				"data": nil,
+			})
+		}
+
+		context.JSON(http.StatusOK, gin.H{
+			"code":"200",
+			"message":"success",
+			"data": student,
+		})
 	})
 
 	router .Run()
